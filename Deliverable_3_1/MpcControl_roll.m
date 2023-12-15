@@ -28,13 +28,45 @@ classdef MpcControl_roll < MpcControlBase
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
+
+            % Horizon and cost matrices
+            Q = 20 * eye(2);
+            R = 1;
+
+            % u in U = { u | Mu <= m }
+            M = [1;-1]; m = [20; 20];
+   
+            % Compute LQR controller for unconstrained system
+            [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
+            % MATLAB defines K as -K, so invert its sign
+            K = -K; 
             
-            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
-            %       the DISCRETE-TIME MODEL of your system
-            
+            % Compute maximal invariant set
+            Xf = polytope(M*K,m);
+            Acl = mpc.A+mpc.B*K;
+            while 1
+                prevXf = Xf;
+                [T,t] = double(Xf);
+                preXf = polytope(T*Acl,t);
+                Xf = intersect(Xf, preXf);
+                if isequal(prevXf, Xf)
+                    break
+                end
+            end
+            [Ff,ff] = double(Xf);
+
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
-            obj = 0;
-            con = [];
+
+            con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
+            obj = U(:,1)'*R*U(:,1);
+            for i = 2:N-1
+                con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
+                con = con + (M*U(:,i) <= m);%(F*X(:,i) <= f) 
+                obj = obj + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+            end
+            con = con + (Ff*X(:,N) <= ff);
+            obj = obj + X(:,N)'*Qf*X(:,N);
+            
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -41,10 +41,11 @@ classdef MpcControl_x < MpcControlBase
             
             
             %% TODO not clear if I have to subtract the steady state xs,us in the constraints
+           
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }
-            F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
+            F = [0 1 0 0; 0 -1 0 0]; f = [x`.1745; .1745];
             
             % Compute LQR controller for unconstrained system
             [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
@@ -81,8 +82,7 @@ classdef MpcControl_x < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % Return YALMIP optimizer object
-            %ctrl_opti = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
-            ctrl_opti = optimizer(con, obj, sdpsettings('solver','sedumi'), ...
+            ctrl_opti = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
                 {X(:,1), x_ref, u_ref}, {U(:,1), X, U});
         end
         
@@ -116,8 +116,7 @@ classdef MpcControl_x < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % Compute the steady-state target
-            %target_opti = optimizer(con, obj, sdpsettings('solver', 'gurobi'), ref, {xs, us});
-            target_opti = optimizer(con, obj, sdpsettings('solver', 'sedumi'), ref, {xs, us});
+            target_opti = optimizer(con, obj, sdpsettings('solver', 'gurobi'), ref, {xs, us});
         end
     end
 end

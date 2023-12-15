@@ -42,18 +42,51 @@ classdef MpcControl_z < MpcControlBase
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
+
+            % Horizon and cost matrices
+            Q = 10 * eye(2);
+            R = 1;
+
+            % u in U = { u | Mu <= m }
+            us = 56.6667;
+            M = [1;-1]; m = [80-us; -(50-us)];
+               
+            % Compute LQR controller for unconstrained system
+            [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
+            % MATLAB defines K as -K, so invert its sign
+            K = -K; 
             
-            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
-            %       the DISCRETE-TIME MODEL of your system
-            
+            % Compute maximal invariant set
+            Xf = polytope([M*K],[m]);
+            Acl = mpc.A+mpc.B*K;
+            while 1
+                prevXf = Xf;
+                [T,t] = double(Xf);
+                preXf = polytope(T*Acl,t);
+                Xf = intersect(Xf, preXf);
+                if isequal(prevXf, Xf)
+                    break
+                end
+            end
+            [Ff,ff] = double(Xf);
+
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
-            obj = 0;
-            con = [];
+
+            con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
+            obj = U(:,1)'*R*U(:,1);
+            for i = 2:N-1
+                con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
+                con = con + (M*U(:,i) <= m);%(F*X(:,i) <= f) 
+                obj = obj + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+            end
+            con = con + (Ff*X(:,N) <= ff);
+            obj = obj + X(:,N)'*Qf*X(:,N);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % Return YALMIP optimizer object
+            %ctrl_opti = optimizer(con, obj, sdpsettings('solver','sedumi'), ...
             ctrl_opti = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
                 {X(:,1), x_ref, u_ref, d_est}, {U(:,1), X, U});
         end
@@ -94,6 +127,7 @@ classdef MpcControl_z < MpcControlBase
             
             % Compute the steady-state target
             target_opti = optimizer(con, obj, sdpsettings('solver', 'gurobi'), {ref, d_est}, {xs, us});
+            %target_opti = optimizer(con, obj, sdpsettings('solver', 'sedumi'), {ref, d_est}, {xs, us});
         end
         
         
