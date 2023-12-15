@@ -33,8 +33,7 @@ clc
 %     [w, phi, v, p] = rocket.parse_state(x)
 % end
 % 
-Ts = 1/20;
-rocket = Rocket(Ts);
+
 % Tf = 20.0; % Simulation end time
 % x0 = [deg2rad([0 0 0, 0 0 0]), 0 0 0, 0 0 0]'; % (w, phi, v, p) Initial state
 % u = [deg2rad([0 0]), 62.61, 0 ]'; % (d1 d2 Pavg Pdiff) Constant input
@@ -42,6 +41,26 @@ rocket = Rocket(Ts);
 % rocket.anim_rate = 1; %1.0; % Visualize at 1.0x real−time
 % rocket.vis(T, X, U);
 
+Ts = 1/20;
+rocket = Rocket(Ts);
 
-[xs, us] = rocket.trim() % Compute steady−state for which 0 = f(xs,us)
-sys = rocket.linearize(xs, us) % Linearize the nonlinear model about trim point
+[xs, us] = rocket.trim(); % Compute steady−state for which 0 = f(xs,us)
+sys = rocket.linearize(xs, us); % Linearize the nonlinear model about trim point
+[sys_x, sys_y, sys_z, sys_roll] = rocket.decompose(sys, xs, us); % Decompose the system in 4 independent systems
+
+
+% Design MPC controller
+H = 5; % Horizon length in seconds
+mpc_x = MpcControl_x(sys_x, Ts, H);
+% Get control input ( x is the index of the subsystem here)
+u_x = mpc_x.get_u(x_x);
+
+
+% Evaluate once and plot optimal open−loop trajectory,
+% pad last input to get consistent size with time and state
+[u, T_opt, X_opt, U_opt] = mpc_x.get_u(x);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs(2,4,7,10);
+U_opt = U_opt + us(2);
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us); % Plot as usual
