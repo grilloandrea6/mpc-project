@@ -52,7 +52,7 @@ classdef MpcControl_z < MpcControlBase
             % to set the right constraint
             us = 56.6667;
             M = [1; -1];
-         x`   m = [80 - us; - (50 - us)];
+            m = [80 - us; - (50 - us)];
                
             % Compute LQR controller for unconstrained system
             [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
