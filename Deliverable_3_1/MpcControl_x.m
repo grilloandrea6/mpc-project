@@ -38,10 +38,9 @@ classdef MpcControl_x < MpcControlBase
             R = 1;
             
             % Constraints
-            
-            
-            %% TODO not clear if I have to subtract the steady state xs,us in the constraints
-           
+            % the steady state for sys_x is 0, 
+            % so no need to take it into account for constraints  
+
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }

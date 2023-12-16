@@ -29,24 +29,13 @@ classdef MpcControl_y < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             
-            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
-            %       the DISCRETE-TIME MODEL of your system
-            
-
-
-
-             % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
-            %       the DISCRETE-TIME MODEL of your system
-            
-            
             % Horizon and cost matrices
             Q = 10 * eye(4);
             R = 1;
             
             % Constraints
-            
-            
-            %% TODO not clear if I have to subtract the steady state xs,us in the constraints
+            % the steady state for sys_y is 0, 
+            % so no need to take it into account for constraints
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }

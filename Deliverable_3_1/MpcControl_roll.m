@@ -32,7 +32,10 @@ classdef MpcControl_roll < MpcControlBase
             % Horizon and cost matrices
             Q = 20 * eye(2);
             R = 1;
-
+            
+            % Constraints
+            % the steady state for sys_y is 0, 
+            % so no need to take it into account for constraints
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [20; 20];
    
