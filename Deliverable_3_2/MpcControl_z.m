@@ -45,7 +45,8 @@ classdef MpcControl_z < MpcControlBase
 
             % Horizon and cost matrices
             Q = 10 * eye(2);
-            R = 1;
+            Q(2,2) = 75;
+            R = .01;
 
             % u in U = { u | Mu <= m }
             us = 56.6667;
@@ -57,7 +58,7 @@ classdef MpcControl_z < MpcControlBase
             K = -K; 
             
             % Compute maximal invariant set
-            Xf = polytope([M*K],[m]);
+            Xf = polytope(M * K, m);
             Acl = mpc.A+mpc.B*K;
             while 1
                 prevXf = Xf;
@@ -69,13 +70,14 @@ classdef MpcControl_z < MpcControlBase
                 end
             end
             [Ff,ff] = double(Xf);
+            
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
             obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                %con = con + (M*U(:,i) <= m);
+                con = con + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
             con = con + (Ff * (X(:,N) - x_ref) <= ff);
@@ -121,17 +123,38 @@ classdef MpcControl_z < MpcControlBase
             Rs = 1;
 
             obj = us' * Rs * us;
-            
+
             mat = [eye(size(mpc.A,1))-mpc.A -mpc.B; mpc.C zeros(size(mpc.C,1),size(mpc.B,2))];
 
             con = ((mat * [xs; us]) == [zeros(size(mpc.A,1),1) ; ref]);
-            
-        
+
+
             % u in U = { u | Mu <= m }
             u_trim = 56.6667;
-            M = [1;-1]; m = [80-u_trim; (50-u_trim)];
+            M = [1;-1]; m = [80-u_trim; -(50-u_trim)];
+            con = con + (M * us <= m);
 
-            %con = con + (M * us <= m);
+            %us < 80-utrim
+            
+            %us > -(50-utrim)
+
+
+            %             A = mpc.A;
+            % B = mpc.B;
+            % C = mpc.C;
+            % D = mpc.D;
+
+            % % Constraints
+            % us_trim=56.67;
+            % umin=50-us_trim;
+            % umax=80-us_trim;
+            % 
+            % con = [umin <= us, us <= umax ,...
+            %        xs == A*xs + B*us  ,...
+            %        ref == C*xs      ];
+            % 
+            % obj   = us^2;
+
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             

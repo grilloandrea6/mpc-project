@@ -30,8 +30,9 @@ classdef MpcControl_roll < MpcControlBase
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
 
             % Horizon and cost matrices
-            Q = 20 * eye(2);
-            R = 1;
+            Q = 10 * eye(2);
+            Q(2,2) = 70;
+            R = .01;
 
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [20; 20];
@@ -58,14 +59,14 @@ classdef MpcControl_roll < MpcControlBase
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
-            obj = U(:,1)'*R*U(:,1);
+            obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                con = con + (M*U(:,i) <= m);%(F*X(:,i) <= f) 
-                obj = obj + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+                con = con + (M*U(:,i) <= m);
+                obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff*X(:,N) <= ff);
-            obj = obj + X(:,N)'*Qf*X(:,N);
+            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
@@ -98,8 +99,18 @@ classdef MpcControl_roll < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
-            obj = 0;
-            con = [xs == 0, us == 0];
+            Rs = 1;
+
+            obj = us' * Rs * us;
+            
+            mat = [eye(size(mpc.A,1))-mpc.A -mpc.B; mpc.C zeros(size(mpc.C,1),size(mpc.B,2))];
+
+            con = ((mat * [xs; us]) == [zeros(size(mpc.A,1),1) ; ref]);
+            
+            % u in U = { u | Mu <= m }
+            M = [1;-1]; m = [20; 20];
+
+            con = con + (M*us <= m);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

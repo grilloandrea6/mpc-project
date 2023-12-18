@@ -2,7 +2,7 @@ addpath(fullfile('..', 'src'));
 
 close all
 clear all
-clc
+clc     
 
 %% TODO: This file should produce all the plots for the deliverable
 
@@ -16,7 +16,7 @@ sys = rocket.linearize(xs, us); % Linearize the nonlinear model about trim point
 
 % Design MPC controller
 H = 1; % Horizon length in seconds
-Tf = 10;
+Tf = 15;
 
 mpc_x = MpcControl_x(sys_x, Ts, H);
 mpc_y = MpcControl_y(sys_y, Ts, H);
@@ -32,7 +32,8 @@ x_y_0 = [0 0 0 0]';
 x_z_0 = [0 0]';
 x_roll_0 = [0 deg2rad(40)]';
 
-ref_xyz = -8;
+ref_xyz = 5;
+ref_roll = deg2rad(20);
 
 % 
 % %% controller X
@@ -62,32 +63,31 @@ ref_xyz = -8;
 % [T, X_sub, U_sub] = rocket.simulate_f(sys_y, x_y_0, Tf, @mpc_y.get_u, 0);
 % rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
 
-% 
-%% controller Z
-[u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
-U_opt(:,end+1) = NaN;
-% Account for linearization point
-X_opt = X_opt + xs([9,12]);
-U_opt = U_opt + us(3);
-% open loop plot
-rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us,ref_xyz); % Plot as usual
-
-% closed loop plot
-[T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, ref_xyz);
-rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
-
-
-% 
-% %% controller roll
-% [u, T_opt, X_opt, U_opt] = mpc_roll.get_u(x_roll_0);
+% % 
+% %% controller Z
+% [u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
 % U_opt(:,end+1) = NaN;
 % % Account for linearization point
-% X_opt = X_opt + xs([3,6]);
-% U_opt = U_opt + us(4);
+% X_opt = X_opt + xs([9,12]);
+% U_opt = U_opt + us(3);
 % % open loop plot
-% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_roll, xs, us); % Plot as usual
+% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us,ref_xyz); % Plot as usual
 % 
 % % closed loop plot
-% [T, X_sub, U_sub] = rocket.simulate_f(sys_roll, x_z_0, Tf, @mpc_roll.get_u, 0);
-% rocket.plotvis_sub(T, X_sub, U_sub, sys_roll, xs, us);
-% 
+% [T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, ref_xyz);
+% rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
+
+
+
+%% controller roll
+[u, T_opt, X_opt, U_opt] = mpc_roll.get_u(x_roll_0);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs([3,6]);
+U_opt = U_opt + us(4);
+% open loop plot
+rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_roll, xs, us,ref_roll); % Plot as usual
+
+% closed loop plot
+[T, X_sub, U_sub] = rocket.simulate_f(sys_roll, x_z_0, Tf, @mpc_roll.get_u, ref_roll);
+rocket.plotvis_sub(T, X_sub, U_sub, sys_roll, xs, us);

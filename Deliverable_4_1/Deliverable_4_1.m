@@ -40,10 +40,10 @@ ph.fig.Name = 'booohhh';
 ref = @(t_, x_) ref_TVC(t_);
 
 % Simulate
-Tf = 30;
+Tf = 35;
 [T, X, U, Ref] = rocket.simulate(x0, Tf, @mpc.get_u, ref);
 
 % Visualize
-rocket.anim_rate = 1; % Increase this to make the animation faster
+rocket.anim_rate = 10; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
 ph.fig.Name = 'Merged lin. MPC in nonlinear simulation'; % Set a figure title
