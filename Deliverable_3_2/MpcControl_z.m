@@ -71,22 +71,21 @@ classdef MpcControl_z < MpcControlBase
             [Ff,ff] = double(Xf);
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
-
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
-            obj = U(:,1)'*R*U(:,1);
+            obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                con = con + (M*U(:,i) <= m);%(F*X(:,i) <= f) 
-                obj = obj + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+                %con = con + (M*U(:,i) <= m);
+                obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff*X(:,N) <= ff);
-            obj = obj + X(:,N)'*Qf*X(:,N);
+            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
+            
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % Return YALMIP optimizer object
-            %ctrl_opti = optimizer(con, obj, sdpsettings('solver','sedumi'), ...
             ctrl_opti = optimizer(con, obj, sdpsettings('solver','gurobi'), ...
                 {X(:,1), x_ref, u_ref, d_est}, {U(:,1), X, U});
         end
@@ -119,15 +118,25 @@ classdef MpcControl_z < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
-            obj = 0;
-            con = [xs == 0, us == 0];
+            Rs = 1;
+
+            obj = us' * Rs * us;
             
+            mat = [eye(size(mpc.A,1))-mpc.A -mpc.B; mpc.C zeros(size(mpc.C,1),size(mpc.B,2))];
+
+            con = ((mat * [xs; us]) == [zeros(size(mpc.A,1),1) ; ref]);
+            
+        
+            % u in U = { u | Mu <= m }
+            u_trim = 56.6667;
+            M = [1;-1]; m = [80-u_trim; (50-u_trim)];
+
+            %con = con + (M * us <= m);
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
             % Compute the steady-state target
             target_opti = optimizer(con, obj, sdpsettings('solver', 'gurobi'), {ref, d_est}, {xs, us});
-            %target_opti = optimizer(con, obj, sdpsettings('solver', 'sedumi'), {ref, d_est}, {xs, us});
         end
         
         

@@ -30,6 +30,7 @@ mpc_roll = MpcControl_roll(sys_roll, Ts, H);
 x_x_0 = [0 0 0 3]';
 x_y_0 = [0 0 0 3]';
 x_z_0 = [0 3]';
+% start from 40deg roll
 x_roll_0 = [0 deg2rad(40)]';
 
 % %% controller X

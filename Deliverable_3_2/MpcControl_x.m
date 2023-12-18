@@ -35,13 +35,10 @@ classdef MpcControl_x < MpcControlBase
             
             % Horizon and cost matrices
             Q = 10 * eye(4);
-            R = 1;
+            Q(4,4) = 40;
+            R = .01;
             
             % Constraints
-            
-            
-            %% TODO take into account xs and us in the constraints
-           
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }

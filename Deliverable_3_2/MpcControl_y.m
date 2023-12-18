@@ -38,15 +38,14 @@ classdef MpcControl_y < MpcControlBase
              % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
             %       the DISCRETE-TIME MODEL of your system
             
-            
             % Horizon and cost matrices
             Q = 10 * eye(4);
-            R = 1;
+            Q(4,4) = 40;
+            R = .01;
             
             % Constraints
             
             
-            %% TODO not clear if I have to subtract the steady state xs,us in the constraints
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }
@@ -74,14 +73,14 @@ classdef MpcControl_y < MpcControlBase
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
-            obj = U(:,1)'*R*U(:,1);
+            obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
                 con = con + (F*X(:,i) <= f) + (M*U(:,i) <= m);
-                obj = obj + X(:,i)'*Q*X(:,i) + U(:,i)'*R*U(:,i);
+                obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff*X(:,N) <= ff);
-            obj = obj + X(:,N)'*Qf*X(:,N);
+            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
 
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
@@ -115,8 +114,20 @@ classdef MpcControl_y < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             % You can use the matrices mpc.A, mpc.B, mpc.C and mpc.D
-            obj = 0;
-            con = [xs == 0, us == 0];
+            Rs = 1;
+
+            obj = us' * Rs * us;
+            
+            mat = [eye(size(mpc.A,1))-mpc.A -mpc.B; mpc.C zeros(size(mpc.C,1),size(mpc.B,2))];
+
+            con = ((mat * [xs; us]) == [zeros(size(mpc.A,1),1) ; ref]);
+            
+            % u in U = { u | Mu <= m }
+            M = [1;-1]; m = [.26; .26];
+            % x in X = { x | Fx <= f }
+            F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
+            
+            con = con + (F*xs <= f) + (M*us <= m);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

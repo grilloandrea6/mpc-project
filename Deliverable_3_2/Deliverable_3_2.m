@@ -28,11 +28,11 @@ mpc_roll = MpcControl_roll(sys_roll, Ts, H);
 
 % start from 3 meters
 x_x_0 = [0 0 0 0]';
-x_y_0 = [0 0 0 3]';
-x_z_0 = [0 3]';
+x_y_0 = [0 0 0 0]';
+x_z_0 = [0 0]';
 x_roll_0 = [0 deg2rad(40)]';
 
-ref_x = -4;
+ref_xyz = -8;
 
 % 
 % %% controller X
@@ -63,18 +63,18 @@ ref_x = -4;
 % rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
 
 % 
-% %% controller Z
-% [u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
-% U_opt(:,end+1) = NaN;
-% % Account for linearization point
-% X_opt = X_opt + xs([9,12]);
-% U_opt = U_opt + us(3);
-% % open loop plot
-% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us); % Plot as usual
-% 
-% % closed loop plot
-% [T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, 0);
-% rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
+%% controller Z
+[u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs([9,12]);
+U_opt = U_opt + us(3);
+% open loop plot
+rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us,ref_xyz); % Plot as usual
+
+% closed loop plot
+[T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, ref_xyz);
+rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
 
 
 % 
