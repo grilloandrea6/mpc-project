@@ -70,7 +70,7 @@ R = diag([0.0001 0.0001 0.01 0.0001]);
 for i = 1 : N-1
     eq_constr = [eq_constr; X_sym(:, i+1) - RK4(X_sym(:,i), U_sym(:,i), rocket.Ts, rocket)];
     cost = cost + (X_sym(:, i) - M * ref_sym)'*Q*(X_sym(:, i) - M * ref_sym);
-    cost = cost + (U_sym(:, i) - [0 0 56.6667 0]')'*R*(U_sym(:, i) - [0 0 56.6667 0]');
+    cost = cost + U_sym(:, i)' * R * U_sym(:, i);
 end
 
 cost = cost + (X_sym(:, N) - M * ref_sym)'*Q*(X_sym(:,N) - M * ref_sym);
