@@ -14,7 +14,7 @@ sys = rocket.linearize(xs, us); % Linearize the nonlinear model about trim point
 
 
 % Design MPC controller
-H = 1; % Horizon length in seconds
+H = 10; % Horizon length in seconds
 
 mpc_x = MpcControl_x(sys_x, Ts, H);
 mpc_y = MpcControl_y(sys_y, Ts, H);
@@ -40,7 +40,9 @@ ph.fig.Name = 'booohhh';
 ref = @(t_, x_) ref_TVC(t_);
 
 % Simulate
+H = 1;
 Tf = 35;
+
 [T, X, U, Ref] = rocket.simulate(x0, Tf, @mpc.get_u, ref);
 
 % Visualize
