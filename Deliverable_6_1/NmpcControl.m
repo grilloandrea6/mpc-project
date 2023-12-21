@@ -49,6 +49,25 @@ classdef NmpcControl < handle
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             expected_delay = rocket.delay;
+
+            % matrix to transform from the 4 reference states to the 12 states formulation
+            M = zeros(nx, nu);
+            M(10:12,1:3) = eye(3); %x y z 
+            M(6, 4) = 1; %gamma
+            
+            % Cost matrices
+            %         wx wy wz a b  g  vx  vy  vz   x    y    z
+            Q = diag([30 30 1  1 1 500 20  20  20  5000 5000 5000]);
+            %         d1     d2     pavg  pdiff
+            R = diag([0.0001 0.0001 1.5 0.0001]);
+
+            % Steady-state -> linearization -> discretization -> LQR terminal cost calculation
+            [xs, us] = rocket.trim(); % Compute steady−state for which 0 = f(xs,us)
+            sys = rocket.linearize(xs, us); % Linearize the nonlinear model about trim point
+            sys = c2d(sys,rocket.Ts);
+            [~,Qf,~] = dlqr(sys.A,sys.B,Q,R);
+
+            % Constraints and cost function
             % Cost
             cost = 0;
             % Equality constraints (Casadi SX), each entry == 0
@@ -57,47 +76,30 @@ classdef NmpcControl < handle
             % Inequality constraints (Casadi SX), each entry <= 0
             ineq_constr = [ ; ];
 
+            eq_constr = [eq_constr; X_sym(:, 1) - x0_sym];
 
+            for i = 1 : N-1
+                eq_constr = [eq_constr; X_sym(:, i+1) - RK4(X_sym(:,i), U_sym(:,i), rocket.Ts, rocket)];
+                cost = cost + (X_sym(:, i) - M * ref_sym)' * Q * (X_sym(:, i) - M * ref_sym);
+                cost = cost + U_sym(:, i)' * R * U_sym(:, i);
+            end
 
-M = zeros(nx, nu);
-M(10:12,1:3) = eye(3); %x y z 
-M(6, 4) = 1; %gamma
-%         wx wy wz a b g   vx vy vz x    y    z
-Q = diag([30 30 1  1 1 500 20  20  20  5000 5000 5000]);
-%         d1     d2     pavg  pdiff
-R = diag([0.0001 0.0001 0.01 0.0001]);
-
-for i = 1 : N-1
-    eq_constr = [eq_constr; X_sym(:, i+1) - RK4(X_sym(:,i), U_sym(:,i), rocket.Ts, rocket)];
-    cost = cost + (X_sym(:, i) - M * ref_sym)'*Q*(X_sym(:, i) - M * ref_sym);
-    cost = cost + U_sym(:, i)' * R * U_sym(:, i);
-end
-
-cost = cost + (X_sym(:, N) - M * ref_sym)'*Q*(X_sym(:,N) - M * ref_sym);
-
-
-eq_constr = [eq_constr; X_sym(:, 1) - x0_sym];
-
-
+            cost = cost + (X_sym(:, N) - M * ref_sym)' * Qf * (X_sym(:,N) - M * ref_sym);
 
             % For box constraints on state and input, overwrite entries of
             % lbx, ubx, lbu, ubu defined above
             
-            % x 
+            % x box constraints
             % beta in -75 75
-            lbx(5) = -75;
-            ubx(5) = 75;
+            lbx(5) = -deg2rad(75);
+            ubx(5) = deg2rad(75);
 
-            % u
+            % u box constraints
             % delta1, delta2 in -15 15
             % pavg 20 80
             % pdiff -20 20
             lbu = [-deg2rad(15) -deg2rad(15) 20 -20]';
             ubu = [deg2rad(15) deg2rad(15) 80  20]';
-
-            lbx(6) = -deg2rad(75);
-            ubx(6) = deg2rad(75);
-
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

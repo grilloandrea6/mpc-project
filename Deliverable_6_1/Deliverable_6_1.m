@@ -8,7 +8,7 @@ clc
 
 Ts = 1/20;
 rocket = Rocket(Ts);
-H = 1.5; % Horizon length in seconds
+H = 1; % Horizon length in seconds
 nmpc = NmpcControl(rocket, H);
 
 % MPC reference with default maximum roll = 15 deg
