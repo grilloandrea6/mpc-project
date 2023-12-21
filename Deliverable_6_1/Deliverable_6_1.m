@@ -10,13 +10,7 @@ Ts = 1/20;
 rocket = Rocket(Ts);
 H = 1; % Horizon length in seconds
 nmpc = NmpcControl(rocket, H);
-
-% MPC reference with default maximum roll = 15 deg
-
-% MPC reference with specified maximum roll = 50 deg
-% roll_max = deg2rad(50);
-% ref = @(t_, x_) ref_TVC(t_, roll_max);
-
+    
 x0 = zeros(12,1);
 ref = -ones(4,1);
 % Evaluate once and plot optimal open−loop trajectory,
@@ -28,7 +22,13 @@ ph.fig.Name = 'Open-loop nonlinear MPC.';
 
 
 Tf = 30 ;
-ref = @(t_, x_) ref_TVC(t_);
+
+% MPC reference with default maximum roll = 15 deg
+%ref = @(t_, x_) ref_TVC(t_);
+
+% MPC reference with specified maximum roll = 50 deg
+roll_max = deg2rad(50);
+ref = @(t_, x_) ref_TVC(t_, roll_max);
 
 [T, X, U, Ref] = rocket.simulate(x0, Tf, @nmpc.get_u, ref);
 
