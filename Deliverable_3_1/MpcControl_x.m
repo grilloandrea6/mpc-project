@@ -44,7 +44,7 @@ classdef MpcControl_x < MpcControlBase
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }
-            F = [0 1 0 0; 0 -1 0 0]; f = [x`.1745; .1745];
+            F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
             
             % Compute LQR controller for unconstrained system
             [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
