@@ -1,8 +1,9 @@
-addpath(fullfile('..', 'src'));
-
 close all
 clear all
 clc     
+
+addpath(fullfile('..', 'src'));
+
 
 %% TODO: This file should produce all the plots for the deliverable
 
@@ -32,51 +33,54 @@ x_y_0 = [0 0 0 0]';
 x_z_0 = [0 0]';
 x_roll_0 = [0 deg2rad(40)]';
 
-ref_xyz = 5;
+ref_xyz = 1;
 ref_roll = deg2rad(20);
 
-% 
-% %% controller X
-% [u, T_opt, X_opt, U_opt] = mpc_x.get_u(x_x_0,ref_x);
-% U_opt(:,end+1) = NaN;
-% % Account for linearization point
-% X_opt = X_opt + xs([2,5,7,10]);
-% U_opt = U_opt + us(2);
-% % open loop plot
-% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us, ref_x); % Plot as usual
-% 
-% % closed loop plot
-% [T, X_sub, U_sub] = rocket.simulate_f(sys_x, x_x_0, Tf, @mpc_x.get_u, ref_x);
-% rocket.plotvis_sub(T, X_sub, U_sub, sys_x, xs, us, ref_x);
 
-% 
-% %% controller Y
-% [u, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0);
-% U_opt(:,end+1) = NaN;
-% % Account for linearization point
-% X_opt = X_opt + xs([1,4,8,11]);
-% U_opt = U_opt + us(1);
-% % open loop plot
-% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_y, xs, us); % Plot as usual
-% 
-% % closed loop plot
-% [T, X_sub, U_sub] = rocket.simulate_f(sys_y, x_y_0, Tf, @mpc_y.get_u, 0);
-% rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
+%% controller X
+[u, T_opt, X_opt, U_opt] = mpc_x.get_u(x_x_0,ref_xyz);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs([2,5,7,10]);
+U_opt = U_opt + us(2);
+% open loop plot
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us, ref_xyz); % Plot as usual
+ph.fig.Name = "Controller X - open loop";
 
-% % 
-% %% controller Z
-% [u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
-% U_opt(:,end+1) = NaN;
-% % Account for linearization point
-% X_opt = X_opt + xs([9,12]);
-% U_opt = U_opt + us(3);
-% % open loop plot
-% rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us,ref_xyz); % Plot as usual
-% 
-% % closed loop plot
-% [T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, ref_xyz);
-% rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
+% closed loop plot
+[T, X_sub, U_sub] = rocket.simulate_f(sys_x, x_x_0, Tf, @mpc_x.get_u, ref_xyz);
+ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_x, xs, us, ref_xyz);
+ph.fig.Name = "Controller X - closed loop";
 
+%% controller Y,
+[u, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0,ref_xyz);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs([1,4,8,11]);
+U_opt = U_opt + us(1);
+% open loop plot
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_y, xs, us, ref_xyz); % Plot as usual
+ph.fig.Name = "Controller Y - open loop";
+
+% closed loop plot
+[T, X_sub, U_sub] = rocket.simulate_f(sys_y, x_y_0, Tf, @mpc_y.get_u, ref_xyz);
+ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
+ph.fig.Name = "Controller Y - closed loop";
+
+%% controller Z
+[u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0,ref_xyz);
+U_opt(:,end+1) = NaN;
+% Account for linearization point
+X_opt = X_opt + xs([9,12]);
+U_opt = U_opt + us(3);
+% open loop plot
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us,ref_xyz); % Plot as usual
+ph.fig.Name = "Controller Z - open loop";
+
+% closed loop plot
+[T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, ref_xyz);
+ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
+ph.fig.Name = "Controller Z - closed loop";
 
 
 %% controller roll
@@ -86,8 +90,10 @@ U_opt(:,end+1) = NaN;
 X_opt = X_opt + xs([3,6]);
 U_opt = U_opt + us(4);
 % open loop plot
-rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_roll, xs, us,ref_roll); % Plot as usual
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_roll, xs, us,ref_roll); % Plot as usual
+ph.fig.Name = "Controller roll - open loop";
 
 % closed loop plot
 [T, X_sub, U_sub] = rocket.simulate_f(sys_roll, x_z_0, Tf, @mpc_roll.get_u, ref_roll);
-rocket.plotvis_sub(T, X_sub, U_sub, sys_roll, xs, us);
+ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_roll, xs, us);
+ph.fig.Name = "Controller roll - closed loop";
