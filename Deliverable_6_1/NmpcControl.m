@@ -98,7 +98,7 @@ classdef NmpcControl < handle
             % delta1, delta2 in -15 15
             % pavg 20 80
             % pdiff -20 20
-            lbu = [-deg2rad(15) -deg2rad(15) 20 -20]';
+            lbu = [-deg2rad(15) -deg2rad(15) 50 -20]';
             ubu = [deg2rad(15) deg2rad(15) 80  20]';
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
