@@ -73,14 +73,14 @@ disp("maaaaaa")
             
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
-            con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
+            con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)+ mpc.B*d_est) + (M*U(:,1) <= m); % added d_est
             obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
                 con = con + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            con = con + (Ff * (X(:,N) - x_ref) <= ff); % could drop terminal set
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             
@@ -126,7 +126,7 @@ disp("maaaaaa")
 
             mat = [eye(size(mpc.A,1))-mpc.A -mpc.B; mpc.C zeros(size(mpc.C,1),size(mpc.B,2))];
 
-            con = ((mat * [xs; us]) == [zeros(size(mpc.A,1),1) ; ref]);
+            con = ((mat * [xs; us]) == [mpc.B*d_est ; ref]); % modified need to include the disturbance in the steady state target
 
 
             % u in U = { u | Mu <= m }
@@ -187,9 +187,11 @@ disp("maaaaaa")
             % can compute L by using the LQR, 
             % system : error_i+1= (A'+C'*L) error, Optimal L given Q, R
             % more intuitive to tune Q, R rather than tune eigenvalues
-            R = .1;
-            L  = dlqr(A_bar', C_bar', eye(nx+1), R);
+            R_l = 0.1;
+            Q_l = 100*eye(nx+1);
+            L  = dlqr(A_bar', C_bar', Q_l, R_l);
             L= -L';
+
 
             % alternative is to poleplacement
             %L = -place(A_pred',C_pred',[0.5 0.6 0.7]); % controller for x pred
