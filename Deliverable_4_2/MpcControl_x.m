@@ -87,7 +87,7 @@ classdef MpcControl_x < MpcControlBase
             % Creat the first optimizer
             slack_optimizer = optimizer(con1, obj1, sdpsettings('solver', 'gurobi'), ...
                                         {X(:,1)}, {[epsilon]});
-            % inputs = {mpc.C'};
+            
             inputs = {[0; 0; 0; 0]};
             
 
