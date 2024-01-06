@@ -4,8 +4,6 @@ close all
 clear all
 clc
 
-%% TODO: This file should produce all the plots for the deliverable
-
 Ts = 1/20;
 rocket = Rocket(Ts);
 
@@ -23,24 +21,23 @@ mpc_y = MpcControl_y(sys_y, Ts, H);
 mpc_z = MpcControl_z(sys_z, Ts, H);
 mpc_roll = MpcControl_roll(sys_roll, Ts, H);
 
-% Evaluate once and plot optimal open−loop trajectory,
-% pad last input to get consistent size with time and state
 
-% start from 3 meters
+% Define initial state
+% start from 3 meters for x,y,z
 x_x_0 = [0 0 0 3]';
 x_y_0 = [0 0 0 3]';
 x_z_0 = [0 3]';
-% start from 40deg roll
+% start from 40deg for roll
 x_roll_0 = [0 deg2rad(40)]';
 
 %% controller X
-[u, T_opt, X_opt, U_opt] = mpc_x.get_u(x_x_0);
+[~, T_opt, X_opt, U_opt] = mpc_x.get_u(x_x_0);
 U_opt(:,end+1) = NaN;
 % Account for linearization point
 X_opt = X_opt + xs([2,5,7,10]);
 U_opt = U_opt + us(2);
 % open loop plot
-ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us); % Plot as usual
+ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us);
 ph.fig.Name = "Controller X - Open Loop";
 
 % closed loop plot
@@ -49,7 +46,7 @@ ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_x, xs, us);
 ph.fig.Name = "Controller X - Closed Loop";
 
 %% controller Y
-[u, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0);
+[~, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0);
 U_opt(:,end+1) = NaN;
 % Account for linearization point
 X_opt = X_opt + xs([1,4,8,11]);
@@ -64,7 +61,7 @@ ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
 ph.fig.Name = "Controller Y - Closed Loop";
 
 %% controller Z
-[u, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
+[~, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
 U_opt(:,end+1) = NaN;
 % Account for linearization point
 X_opt = X_opt + xs([9,12]);
