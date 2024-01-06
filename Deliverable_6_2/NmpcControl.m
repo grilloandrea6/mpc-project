@@ -25,7 +25,7 @@ classdef NmpcControl < handle
     methods
         function obj = NmpcControl(rocket, tf, expected_delay)
             if nargin < 3, expected_delay = 0; end
-           
+
             import casadi.*
             
             N_segs = ceil(tf/rocket.Ts); % MPC horizon
@@ -158,13 +158,17 @@ classdef NmpcControl < handle
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             delay = obj.expected_delay;
-            mem_u = obj.mem_u;
             
             % Delay compensation: Predict x0 delay timesteps later.
             % Simulate x_ for 'delay' timesteps
             x_ = x0;
             % ...
        
+            for i = 1 : delay
+            %    x_ = RK4(x_,obj.mem_u,Ts,obj.rocket);
+                x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_,obj.mem_u);
+            end
+
             x0 = x_;
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -182,6 +186,8 @@ classdef NmpcControl < handle
             % Delay compensation: Save current u
             if obj.expected_delay > 0
                % obj.mem_u = ...
+               %% ToDo antiplagio
+              obj.mem_u = u;
             end
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
