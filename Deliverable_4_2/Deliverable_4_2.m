@@ -6,8 +6,8 @@ clc
 
 % Constant definition
 Ts = 1/20; % Sampling time
-H = 5; % Horizon length in seconds
-Tf = 20; % Simulation time
+H = 1; % Horizon length in seconds
+Tf = 30; % Simulation time
 
 rocket = Rocket(Ts);
 
