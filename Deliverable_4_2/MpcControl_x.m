@@ -47,8 +47,8 @@ classdef MpcControl_x < MpcControlBase
             % x in X = { x | Fx <= f }
             F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
             epsilon = sdpvar(size(f,1), N-1, 'full'); % Slack variables
-            S = 100 * eye(size(f,1));
-            s = 1 * ones(size(f,1), 1); 
+            S = 200 * eye(size(f,1));
+            s = 25 * ones(size(f,1), 1); 
 
             
             % Compute LQR controller for unconstrained system
@@ -70,36 +70,8 @@ classdef MpcControl_x < MpcControlBase
             % end
             % [Ff,ff] = double(Xf);
 
-            %% Step 1: Minimize Constraint Violation
 
-            con1 = [];
-            obj1 = 0;
-            for i = 1:N-1
-                % System dynamics and constraints
-                con1 = con1 + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                con1 = con1 + (F*X(:,i+1) <= f + epsilon(:, i)) + (M*U(:,i) <= m);        
-                con1 = [con1, epsilon(:, i) >= 0];
-                % Define the objective for slack minimization
-                obj1 = obj1 + epsilon(:, i)' * S * epsilon(:, i) + s' * epsilon(:, i);
-            end
-
-            % Solve Step 1
-            % Creat the first optimizer
-            slack_optimizer = optimizer(con1, obj1, sdpsettings('solver', 'gurobi'), ...
-                                        {X(:,1)}, {[epsilon]});
-            
-            inputs = {[0; 0; 0; 0]};
-            
-
-            [solution, infeasible] = slack_optimizer{inputs}; 
-            epsilon_min = solution;
-
-           % checking infeasibility
-           if infeasible == 1
-                error('The problem is infeasible');
-           end  
-           
-            %% Step 2: Optimize Controller Performance
+          
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
             % current_input = {X(:,1), x_ref, u_ref}; 
@@ -110,10 +82,13 @@ classdef MpcControl_x < MpcControlBase
 
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                con = con + (F*X(:,i) <= f + epsilon_min(:,i-1)) + (M*U(:,i) <= m);
+                con = con + (F*X(:,i) <= f + epsilon(:,i-1)) + (M*U(:,i) <= m);
+                con = [con epsilon(:, i) >= 0];
+
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
+                obj = obj + epsilon(:, i)' * S * epsilon(:, i) + s' * epsilon(:, i);
             end
-            con = con + (F * (X(:,N) - x_ref) <= f + epsilon_min(:, N-1));
+            con = con + (F * (X(:,N) - x_ref) <= f + epsilon(:, N-1));
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
