@@ -1,8 +1,8 @@
 addpath(fullfile('..', 'src'));
 
-%close all
-%clear all
-%clc
+close all
+clear all
+clc
 
 %% TODO: This file should produce all the plots for the deliverable
 
@@ -27,7 +27,7 @@ mpc_roll = MpcControl_roll(sys_roll, Ts, H);
 mpc = rocket.merge_lin_controllers(xs, us, mpc_x, mpc_y, mpc_z, mpc_roll);
 
 x0 = [zeros(1, 9), 1, 0, 3]' ;
-ref = [1.2, 0, 3, 0];% this shouldn't be transposed otherwise i have some problems with dimensions
+ref = [1.2, 0, 3, 0]';
 
 % Simulate
 Tf = 15;
