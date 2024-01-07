@@ -19,7 +19,7 @@ ph = rocket.plotvis(T_opt, X_opt, U_opt, ref);
 ph.fig.Name = 'Open-loop nonlinear MPC.';
 
 
-Tf = 30 ;
+Tf = 30;
 
 % MPC reference with default maximum roll = 15 deg
 %ref = @(t_, x_) ref_TVC(t_);
