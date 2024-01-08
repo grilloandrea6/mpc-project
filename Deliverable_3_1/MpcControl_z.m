@@ -73,6 +73,11 @@ classdef MpcControl_z < MpcControlBase
             end
             [Ff, ff] = double(Xf);
 
+
+            fig = figure('visible','off');
+            Xf.plot();
+            saveas(fig,'img/ztermproj.png')
+            
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
             con = (X(:,2) == mpc.A * X(:,1) + mpc.B * U(:,1)) + (M * U(:,1) <= m);

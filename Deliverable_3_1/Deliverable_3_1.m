@@ -39,11 +39,13 @@ U_opt = U_opt + us(2);
 % open loop plot
 ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_x, xs, us);
 ph.fig.Name = "Controller X - Open Loop";
+saveas(ph.fig,'img/xopen.png')
 
 % closed loop plot
 [T, X_sub, U_sub] = rocket.simulate_f(sys_x, x_x_0, Tf, @mpc_x.get_u, 0);
 ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_x, xs, us);
 ph.fig.Name = "Controller X - Closed Loop";
+saveas(ph.fig,'img/xclosed.png')
 
 %% controller Y
 [~, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0);
@@ -54,11 +56,13 @@ U_opt = U_opt + us(1);
 % open loop plot
 ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_y, xs, us); % Plot as usual
 ph.fig.Name = "Controller Y - Open Loop";
+saveas(ph.fig,'img/yopen.png')
 
 % closed loop plot
 [T, X_sub, U_sub] = rocket.simulate_f(sys_y, x_y_0, Tf, @mpc_y.get_u, 0);
 ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_y, xs, us);
 ph.fig.Name = "Controller Y - Closed Loop";
+saveas(ph.fig,'img/yclosed.png')
 
 %% controller Z
 [~, T_opt, X_opt, U_opt] = mpc_z.get_u(x_z_0);
@@ -69,12 +73,13 @@ U_opt = U_opt + us(3);
 % open loop plot
 ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_z, xs, us); % Plot as usual
 ph.fig.Name = "Controller Z - Open Loop";
+saveas(ph.fig,'img/zopen.png')
 
 % closed loop plot
 [T, X_sub, U_sub] = rocket.simulate_f(sys_z, x_z_0, Tf, @mpc_z.get_u, 0);
 ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_z, xs, us);
 ph.fig.Name = "Controller Z - Closed Loop";
-
+saveas(ph.fig,'img/zclosed.png')
 
 
 %% controller roll
@@ -86,8 +91,10 @@ U_opt = U_opt + us(4);
 % open loop plot
 ph = rocket.plotvis_sub(T_opt, X_opt, U_opt, sys_roll, xs, us); % Plot as usual
 ph.fig.Name = "Controller roll - Open Loop";
+saveas(ph.fig,'img/rollopen.png')
 
 % closed loop plot
-[T, X_sub, U_sub] = rocket.simulate_f(sys_roll, x_z_0, Tf, @mpc_roll.get_u, 0);
+[T, X_sub, U_sub] = rocket.simulate_f(sys_roll, x_roll_0, Tf, @mpc_roll.get_u, 0);
 ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_roll, xs, us);
 ph.fig.Name = "Controller roll - Closed Loop";
+saveas(ph.fig,'img/rollclosed.png')

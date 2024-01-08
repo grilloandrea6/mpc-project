@@ -29,9 +29,7 @@ classdef MpcControl_x < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             
-          
-
-             % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
+            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
             %       the DISCRETE-TIME MODEL of your system
             
             % Horizon and cost matrices
@@ -40,8 +38,7 @@ classdef MpcControl_x < MpcControlBase
             R = .01;
             
             % Constraints
-            
-            
+
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }
@@ -75,7 +72,7 @@ classdef MpcControl_x < MpcControlBase
                 con = con + (F*X(:,i) <= f) + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            %con = con + (Ff * (X(:,N) - x_ref) <= ff);
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE

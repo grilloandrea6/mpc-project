@@ -65,6 +65,16 @@ classdef MpcControl_x < MpcControlBase
             end
             [Ff,ff] = double(Xf);
 
+            fig = figure('visible','off');
+            Xf.projection(1:2).plot();
+            saveas(fig,'img/xtermproj12.png')
+            fig = figure('visible','off');
+            Xf.projection(2:3).plot();
+            saveas(fig,'img/xtermproj23.png')
+            fig = figure('visible','off');
+            Xf.projection(3:4).plot();
+            saveas(fig,'img/xtermproj34.png')
+
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);

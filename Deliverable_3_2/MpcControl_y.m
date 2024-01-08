@@ -79,7 +79,7 @@ classdef MpcControl_y < MpcControlBase
                 con = con + (F*X(:,i) <= f) + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            %con = con + (Ff * (X(:,N) - x_ref) <= ff);
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
 

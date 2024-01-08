@@ -80,7 +80,7 @@ classdef MpcControl_z < MpcControlBase
                 con = con + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            %con = con + (Ff * (X(:,N) - x_ref) <= ff);
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             
