@@ -41,8 +41,8 @@ classdef MpcControl_x < MpcControlBase
             Q = 10 * eye(4);
             Q(4,4) = 40;
             R = .01;
-            S = 200 * eye(2);
-            s = 25 * ones(2, 1);
+            S = 100 * eye(2);
+            s = 50 * ones(2, 1);
 
             % Constraints
             
@@ -128,3 +128,4 @@ classdef MpcControl_x < MpcControlBase
         end
     end
 end
+
