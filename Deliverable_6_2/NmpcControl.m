@@ -50,56 +50,50 @@ classdef NmpcControl < handle
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
 
-            % matrix to transform from the 4 reference states to the 12 states formulation
-            M = zeros(nx, nu);
-            M(10:12,1:3) = eye(3); %x y z 
-            M(6, 4) = 1; %gamma
+            % Matrix to transform from the 4 reference states to the 12 states formulation
+            convMat = zeros(nx, nu);
+            convMat(10:12,1:3) = eye(3);    % x y z 
+            convMat(6, 4) = 1;              % gamma
             
             % Cost matrices
-            %         wx wy wz a b  g  vx  vy  vz   x    y    z
+            %         wx wy wz a b g   vx  vy  vz  x    y    z
             Q = diag([30 30 1  1 1 500 20  20  20  5000 5000 5000]);
-            %         d1     d2     pavg  pdiff
-            R = diag([0.0001 0.0001 2.5 0.0001]);
+            %         d1     d2     pavg pdiff
+            R = diag([0.0001 0.0001 2.5  0.0001]);
 
             % Steady-state -> linearization -> discretization -> LQR terminal cost calculation
-            [xs, us] = rocket.trim(); % Compute steady−state for which 0 = f(xs,us)
-            sys = rocket.linearize(xs, us); % Linearize the nonlinear model about trim point
+            [xs, us] = rocket.trim();
+            sys = rocket.linearize(xs, us);
             sys = c2d(sys,rocket.Ts);
             [~,Qf,~] = dlqr(sys.A,sys.B,Q,R);
 
             % Constraints and cost function
             % Cost
             cost = 0;
-            % Equality constraints (Casadi SX), each entry == 0
-            eq_constr = [ ; ];
 
             % Inequality constraints (Casadi SX), each entry <= 0
             ineq_constr = [ ; ];
 
-            eq_constr = [eq_constr; X_sym(:, 1) - x0_sym];
+            % Equality constraints (Casadi SX), each entry == 0
+            eq_constr = X_sym(:, 1) - x0_sym;
 
             for i = 1 : N-1
                 eq_constr = [eq_constr; X_sym(:, i+1) - RK4(X_sym(:,i), U_sym(:,i), rocket.Ts, rocket)];
-                cost = cost + (X_sym(:, i) - M * ref_sym)' * Q * (X_sym(:, i) - M * ref_sym);
+                cost = cost + (X_sym(:, i) - convMat * ref_sym)' * Q * (X_sym(:, i) - convMat * ref_sym);
                 cost = cost + U_sym(:, i)' * R * U_sym(:, i);
             end
 
-            cost = cost + (X_sym(:, N) - M * ref_sym)' * Qf * (X_sym(:,N) - M * ref_sym);
+            cost = cost + (X_sym(:, N) - convMat * ref_sym)' * Qf * (X_sym(:,N) - convMat * ref_sym);
 
-            % For box constraints on state and input, overwrite entries of
-            % lbx, ubx, lbu, ubu defined above
-            
             % x box constraints
             % beta in -75 75
             lbx(5) = -deg2rad(75);
             ubx(5) = deg2rad(75);
 
             % u box constraints
-            % delta1, delta2 in -15 15
-            % pavg 20 80
-            % pdiff -20 20
-            lbu = [-deg2rad(15) -deg2rad(15) 50 -20]';
-            ubu = [deg2rad(15) deg2rad(15) 80  20]';
+            %       delta1       delta2       pavg  pdiff
+            lbu = [-deg2rad(15) -deg2rad(15)   50   -20]';
+            ubu = [ deg2rad(15)  deg2rad(15)   80    20]';
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -144,8 +138,9 @@ classdef NmpcControl < handle
             obj.expected_delay = expected_delay;
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
-
-            u_init = zeros(4, 1); % Replace this by a better initialization
+            
+            % start from the previously computed steady state, with Pavg = 56.667
+            u_init = zeros(4, 1);
             u_init(3) = 56.667;
 
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
@@ -162,11 +157,12 @@ classdef NmpcControl < handle
             % Delay compensation: Predict x0 delay timesteps later.
             % Simulate x_ for 'delay' timesteps
             x_ = x0;
-            % ...
        
             for i = 1 : delay
-            %    x_ = RK4(x_,obj.mem_u,Ts,obj.rocket);
-                x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_,obj.mem_u);
+                %x_ = RK4(x_,obj.mem_u,Ts,obj.rocket);
+
+                % Euler integration
+                x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_,obj.mem_u(:,i));
             end
 
             x0 = x_;
@@ -185,9 +181,8 @@ classdef NmpcControl < handle
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             % Delay compensation: Save current u
             if obj.expected_delay > 0
-               % obj.mem_u = ...
-               %% ToDo antiplagio
-              obj.mem_u = u;
+                % u that will be used for the delayed steps is current one
+                obj.mem_u = repmat(u, 1, obj.expected_delay);
             end
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
