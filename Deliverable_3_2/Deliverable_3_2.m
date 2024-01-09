@@ -50,7 +50,7 @@ ph = rocket.plotvis_sub(T, X_sub, U_sub, sys_x, xs, us, ref_xyz);
 ph.fig.Name = "Controller X - closed loop";
 saveas(ph.fig,'img/xclosed.png')
 
-%% controller Y,
+%% controller Y
 [~, T_opt, X_opt, U_opt] = mpc_y.get_u(x_y_0,ref_xyz);
 U_opt(:,end+1) = NaN;
 % Account for linearization point
