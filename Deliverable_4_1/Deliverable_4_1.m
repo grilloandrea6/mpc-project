@@ -7,7 +7,7 @@ clc
 % Constant definition
 Ts = 1/20; % Sampling time
 H = 5; % Horizon length in seconds
-Tf = 20; % Simulation time
+Tf = 30; % Simulation time
 
 rocket = Rocket(Ts);
 
@@ -33,13 +33,14 @@ U_opt(:,end+1) = nan;
 
 ph = rocket.plotvis(T_opt, X_opt, U_opt, ref4); % Plot as usual
 ph.fig.Name = 'Linear MPC in nonlinear system - Open Loop simulation'; 
-
+saveas(ph.fig, 'img/openloop.png')
 % Setup reference function
 ref = @(t_, x_) ref_TVC(t_);
 
 [T, X, U, Ref] = rocket.simulate(x0, Tf, @mpc.get_u, ref);
 
 % Visualize
-rocket.anim_rate = 10; % Increase this to make the animation faster
+rocket.anim_rate = 3; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
 ph.fig.Name = 'Linear MPC in nonlinear system - Closed Loop simulation'; 
+saveas(ph.fig, 'img/closedloop.png')

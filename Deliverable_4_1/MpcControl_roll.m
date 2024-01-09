@@ -38,23 +38,7 @@ classdef MpcControl_roll < MpcControlBase
             M = [1;-1]; m = [20; 20];
    
             % Compute LQR controller for unconstrained system
-            [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
-            % MATLAB defines K as -K, so invert its sign
-            K = -K; 
-            
-            % Compute maximal invariant set
-            Xf = polytope(M*K,m);
-            Acl = mpc.A+mpc.B*K;
-            while 1
-                prevXf = Xf;
-                [T,t] = double(Xf);
-                preXf = polytope(T*Acl,t);
-                Xf = intersect(Xf, preXf);
-                if isequal(prevXf, Xf)
-                    break
-                end
-            end
-            [Ff,ff] = double(Xf);
+            [~,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
@@ -65,7 +49,6 @@ classdef MpcControl_roll < MpcControlBase
                 con = con + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             

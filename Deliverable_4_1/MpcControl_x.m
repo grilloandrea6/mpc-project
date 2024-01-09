@@ -31,14 +31,19 @@ classdef MpcControl_x < MpcControlBase
             
           
 
-             % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
+            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
             %       the DISCRETE-TIME MODEL of your system
+            
+            % Slack variables
+            epsilon = sdpvar(2, N - 1, 'full'); 
             
             % Horizon and cost matrices
             Q = 10 * eye(4);
             Q(4,4) = 40;
             R = .01;
-            
+            S = 200 * eye(2);
+            s = 25 * ones(2, 1);
+
             % Constraints
             
             
@@ -48,23 +53,7 @@ classdef MpcControl_x < MpcControlBase
             F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
             
             % Compute LQR controller for unconstrained system
-            [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
-            % MATLAB defines K as -K, so invert its sign
-            K = -K; 
-            
-            % Compute maximal invariant set
-            Xf = polytope([F;M*K],[f;m]);
-            Acl = mpc.A+mpc.B*K;
-            while 1
-                prevXf = Xf;
-                [T,t] = double(Xf);
-                preXf = polytope(T*Acl,t);
-                Xf = intersect(Xf, preXf);
-                if isequal(prevXf, Xf)
-                    break
-                end
-            end
-            [Ff,ff] = double(Xf);
+            [~,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
@@ -72,12 +61,18 @@ classdef MpcControl_x < MpcControlBase
             obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
             for i = 2:N-1
                 con = con + (X(:,i+1) == mpc.A*X(:,i) + mpc.B*U(:,i));
-                con = con + (F*X(:,i) <= f) + (M*U(:,i) <= m);
+                con = con + (F*X(:,i) <= f + epsilon(:,i-1)) + (M*U(:,i) <= m);
+                con = [con epsilon(:, i-1) >= 0];
+
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
+                obj = obj + epsilon(:, i-1)' * S * epsilon(:, i-1) + s' * epsilon(:, i-1);
+
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
+            con = [con epsilon(:, N-1) >= 0];
+            con = con + (F * (X(:,N) - x_ref) <= f + epsilon(:, N-1));
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
-            
+            obj = obj + epsilon(:, N-1)' * S * epsilon(:, N-1) + s' * epsilon(:, N-1);
+
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
