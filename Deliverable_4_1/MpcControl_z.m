@@ -44,8 +44,8 @@ classdef MpcControl_z < MpcControlBase
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
 
             % Horizon and cost matrices
-            Q = 10 * eye(2);
-            Q(2,2) = 75;
+            Q = 20 * eye(2);
+            Q(2,2) = 200;
             R = .01;
 
             % u in U = { u | Mu <= m }
