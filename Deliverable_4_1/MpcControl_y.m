@@ -37,8 +37,10 @@ classdef MpcControl_y < MpcControlBase
 
             % Horizon and cost matrices
             Q = 10 * eye(4);
-            Q(4,4) = 40;
-            R = .01;
+            Q(1,1) = 40;
+            Q(2,2) = 200;
+            Q(4,4) = 100;
+            R = .04;
             S = 100 * eye(2);
             s = 50 * ones(2, 1);
 
