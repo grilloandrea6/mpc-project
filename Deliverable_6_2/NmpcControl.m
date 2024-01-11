@@ -54,12 +54,12 @@ classdef NmpcControl < handle
             convMat = zeros(nx, nu);
             convMat(10:12,1:3) = eye(3);    % x y z 
             convMat(6, 4) = 1;              % gamma
-            
+
             % Cost matrices
             %         wx wy wz a b g   vx  vy  vz  x    y    z
             Q = diag([30 30 1  1 1 500 20  20  20  5000 5000 5000]);
-            %         d1     d2     pavg pdiff
-            R = diag([0.0001 0.0001 2.5  0.0001]);
+            %         d1     d2      pavg pdiff
+            R = diag([100000 200000  2.5  0.0001]);
 
             % Steady-state -> linearization -> discretization -> LQR terminal cost calculation
             [xs, us] = rocket.trim();
@@ -157,9 +157,9 @@ classdef NmpcControl < handle
             % Delay compensation: Predict x0 delay timesteps later.
             % Simulate x_ for 'delay' timesteps
             x_ = x0;
-       
+
             for i = 1 : delay
-                %x_ = RK4(x_,obj.mem_u,Ts,obj.rocket);
+                %x_ = RK4(x_,obj.mem_u,obj.rocket.Ts,obj.rocket);
 
                 % Euler integration
                 x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_,obj.mem_u(:,i));
