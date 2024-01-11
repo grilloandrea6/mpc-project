@@ -157,12 +157,12 @@ classdef NmpcControl < handle
             % Delay compensation: Predict x0 delay timesteps later.
             % Simulate x_ for 'delay' timesteps
             x_ = x0;
-
-            for i = 1 : delay
-                %x_ = RK4(x_,obj.mem_u,obj.rocket.Ts,obj.rocket);
+            
+            for i = size(obj.mem_u,2)-delay+1 : size(obj.mem_u,2)
+                %x_ = RK4(x_, obj.mem_u(:,i), obj.rocket.Ts, obj.rocket);
 
                 % Euler integration
-                x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_,obj.mem_u(:,i));
+                x_ = x_ + obj.rocket.Ts * obj.rocket.f(x_, obj.mem_u(:,i));
             end
 
             x0 = x_;
@@ -181,8 +181,7 @@ classdef NmpcControl < handle
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             % Delay compensation: Save current u
             if obj.expected_delay > 0
-                % u that will be used for the delayed steps is current one
-                obj.mem_u = repmat(u, 1, obj.expected_delay);
+                obj.mem_u = [obj.mem_u u];
             end
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
