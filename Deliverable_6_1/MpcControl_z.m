@@ -44,8 +44,8 @@ classdef MpcControl_z < MpcControlBase
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
 
             % Horizon and cost matrices
-            Q = 10 * eye(2);
-            Q(2,2) = 75;
+            Q = 20 * eye(2);
+            Q(2,2) = 200;
             R = .01;
 
             % u in U = { u | Mu <= m }
@@ -54,7 +54,7 @@ classdef MpcControl_z < MpcControlBase
                
             % Compute LQR controller for unconstrained system
             [~,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
-
+                        
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
             con = (X(:,2) == mpc.A*X(:,1) + mpc.B*U(:,1)) + (M*U(:,1) <= m);
             obj = (U(:,1) - u_ref)' * R * (U(:,1) - u_ref);
@@ -121,7 +121,7 @@ classdef MpcControl_z < MpcControlBase
             %us > -(50-utrim)
 
 
-            % A = mpc.A;
+            %             A = mpc.A;
             % B = mpc.B;
             % C = mpc.C;
             % D = mpc.D;
