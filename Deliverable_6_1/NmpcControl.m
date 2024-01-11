@@ -57,9 +57,10 @@ classdef NmpcControl < handle
             
             % Cost matrices
             %         wx wy wz a b g   vx  vy  vz  x    y    z
-            Q = diag([30 30 1  1 1 500 20  20  20  5000 5000 5000]);
-            %         d1     d2     pavg pdiff
-            R = diag([0.0001 0.0001 2.5  0.0001]);
+            Q = diag([20 20 5  1 1 500 20  20  15  4500 4500 4500]);
+            %         d1   d2 pavg   pdiff
+            R = diag([0.01 0.01 2.5  0.01]);
+
 
             % Steady-state -> linearization -> discretization -> LQR terminal cost calculation
             [xs, us] = rocket.trim();
