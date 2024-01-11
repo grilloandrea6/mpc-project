@@ -4,8 +4,6 @@ close all
 clear all
 clc
 
-%% TODO: This file should produce all the plots for the deliverable
-
 Ts = 1/20;
 rocket = Rocket(Ts);
 
@@ -30,7 +28,7 @@ x0 = [zeros(1, 9), 1, 0, 3]' ;
 ref = [1.2, 0, 3, 0]';
 
 % Simulate
-Tf = 15;
+Tf = 8;
 
 % Manipulate mass for simulation
 rocket.mass = 2.13;
@@ -40,4 +38,5 @@ rocket.mass = 2.13;
 % Visualize
 rocket.anim_rate = 10; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
-ph.fig.Name = 'Merged lin. MPC in nonlinear simulation greater mass'; % Set a figure title
+ph.fig.Name = 'Linear MPC in simulation with greater mass and z state estimator';
+saveas(ph.fig, 'img/5_1.png')
