@@ -29,42 +29,22 @@ classdef MpcControl_x < MpcControlBase
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             
-          
-
-             % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
+            % NOTE: The matrices mpc.A, mpc.B, mpc.C and mpc.D are
             %       the DISCRETE-TIME MODEL of your system
             
             % Horizon and cost matrices
             Q = 10 * eye(4);
-            Q(4,4) = 40;
-            R = .01;
+            R = 1;
             
             % Constraints
-            
-            
+
             % u in U = { u | Mu <= m }
             M = [1;-1]; m = [.26; .26];
             % x in X = { x | Fx <= f }
             F = [0 1 0 0; 0 -1 0 0]; f = [.1745; .1745];
             
             % Compute LQR controller for unconstrained system
-            [K,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
-            % MATLAB defines K as -K, so invert its sign
-            K = -K; 
-            
-            % Compute maximal invariant set
-            Xf = polytope([F;M*K],[f;m]);
-            Acl = mpc.A+mpc.B*K;
-            while 1
-                prevXf = Xf;
-                [T,t] = double(Xf);
-                preXf = polytope(T*Acl,t);
-                Xf = intersect(Xf, preXf);
-                if isequal(prevXf, Xf)
-                    break
-                end
-            end
-            [Ff,ff] = double(Xf);
+            [~,Qf,~] = dlqr(mpc.A,mpc.B,Q,R);
 
             % SET THE PROBLEM CONSTRAINTS con AND THE OBJECTIVE obj HERE
 
@@ -75,7 +55,6 @@ classdef MpcControl_x < MpcControlBase
                 con = con + (F*X(:,i) <= f) + (M*U(:,i) <= m);
                 obj = obj + (X(:,i) - x_ref)' * Q * (X(:,i) - x_ref) + (U(:,i) - u_ref)' * R * (U(:,i) - u_ref);
             end
-            con = con + (Ff * (X(:,N) - x_ref) <= ff);
             obj = obj + (X(:,N) - x_ref)' * Qf * (X(:,N) - x_ref);
             
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
