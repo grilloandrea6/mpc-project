@@ -96,9 +96,6 @@ classdef MpcControl_z < MpcControlBase
             ref = sdpvar;
             
             % Disturbance estimate (Ignore this before Part 5)
-            Q = diag([1 100]);
-            R = 0.0001;
-
             d_est = sdpvar;
             
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
