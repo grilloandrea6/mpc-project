@@ -34,7 +34,7 @@ Tf = 20;
 
 % Manipulate mass for simulation
 rocket.mass = 2.13;
-rocket.mass_rate = -0.27; %the mass is changing
+%rocket.mass_rate = -0.27; %the mass is changing
 
 
 %% Simulation without state estimation
@@ -47,7 +47,7 @@ ph.fig.Name = 'Linear MPC in simulation with varying mass';
 saveas(ph.fig,'img/noestimator.png')
 
 %% Simulation with state estimation
-[T, X, U, Ref, Z_hat] = rocket.simulate_est_z(x0, Tf, @mpc.get_u, ref, mpc_z_est, sys_z);
+[T, X, U, Ref, Z_hat] = rocket.simulate_est_z(x0, Tf, @mpc_est.get_u, ref, mpc_z_est, sys_z);
 
 % Visualize
 rocket.anim_rate = 10; % Increase this to make the animation faster
