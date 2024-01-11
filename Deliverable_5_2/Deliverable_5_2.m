@@ -34,7 +34,7 @@ Tf = 20;
 
 % Manipulate mass for simulation
 rocket.mass = 2.13;
-%rocket.mass_rate = -0.27; %the mass is changing
+rocket.mass_rate = -0.27; %the mass is changing
 
 
 %% Simulation without state estimation
