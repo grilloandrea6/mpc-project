@@ -116,27 +116,6 @@ classdef MpcControl_z < MpcControlBase
             M = [1;-1]; m = [80-u_trim; -(50-u_trim)];
             con = con + (M * us <= m);
 
-            %us < 80-utrim
-            
-            %us > -(50-utrim)
-
-
-            %             A = mpc.A;
-            % B = mpc.B;
-            % C = mpc.C;
-            % D = mpc.D;
-
-            % % Constraints
-            % us_trim=56.67;
-            % umin=50-us_trim;
-            % umax=80-us_trim;
-            % 
-            % con = [umin <= us, us <= umax ,...
-            %        xs == A*xs + B*us  ,...
-            %        ref == C*xs      ];
-            % 
-            % obj   = us^2;
-
             % YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE YOUR CODE HERE
             %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             
