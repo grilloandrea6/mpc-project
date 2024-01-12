@@ -43,7 +43,7 @@ rocket.mass = 2.13;
 rocket.anim_rate = 10; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
 ph.fig.Name = 'Linear MPC in simulation with greater mass';
-saveas(ph.fig,'img/noestimator.png')
+saveas(ph.fig,'img/no_estimator.png')
 
 
 %% Simulation with state estimation
@@ -53,4 +53,4 @@ saveas(ph.fig,'img/noestimator.png')
 rocket.anim_rate = 10; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
 ph.fig.Name = 'Linear MPC in simulation with greater mass and z state estimator';
-saveas(ph.fig, 'img/withestimator.png')
+saveas(ph.fig, 'img/with_estimator.png')

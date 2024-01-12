@@ -27,19 +27,26 @@ mpc_est = rocket.merge_lin_controllers(xs, us, mpc_x, mpc_y, mpc_z_est, mpc_roll
 x0 = [zeros(1, 9), 1, 0, 3]' ;
 ref = [1.2, 0, 3, 0]';
 
-% Simulate
-Tf = 20;
 
 % Manipulate mass for simulation
 rocket.mass = 2.13;
 rocket.mass_rate = -0.27; %the mass is changing
 
 
-%% Simulation with state estimation
+%%  Simulation with state estimation for 8 seconds
+Tf = 8;
+[T, X, U, Ref, Z_hat] = rocket.simulate_est_z(x0, Tf, @mpc_est.get_u, ref, mpc_z_est, sys_z);
+% Visualize
+rocket.anim_rate = 10; % Increase this to make the animation faster
+ph = rocket.plotvis(T, X, U, Ref);
+ph.fig.Name = 'Linear MPC in simulation with varying mass and z state estimator';
+saveas(ph.fig,'img/dynamic_mass_8_seconds.png')
+%% Simulation with state estimation 20 seconds
+Tf = 20;
 [T, X, U, Ref, Z_hat] = rocket.simulate_est_z(x0, Tf, @mpc_est.get_u, ref, mpc_z_est, sys_z);
 
 % Visualize
 rocket.anim_rate = 10; % Increase this to make the animation faster
 ph = rocket.plotvis(T, X, U, Ref);
 ph.fig.Name = 'Linear MPC in simulation with varying mass and z state estimator';
-saveas(ph.fig,'img/5_2.png')
+saveas(ph.fig,'img/dynamic_mass_20_seconds.png')
